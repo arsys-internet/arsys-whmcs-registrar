@@ -1,4 +1,4 @@
-<img alt="Arsys" src="https://raw.githubusercontent.com/insightcreativos/arsys-whmcs-registrar/master/logo.png?sanitize=true&raw=true" />
+<img alt="Arsys" src="https://raw.githubusercontent.com/arsys-internet/arsys-whmcs-registrar/master/logo.png?sanitize=true&raw=true" />
 
 # WHMCS REGISTRAR
 
@@ -13,7 +13,7 @@
 
 ## Requisitos
 
-Este proyecto requiere de [la librería de integración con la API Redsys](https://github.com/insightcreativos/arsys-api-sdk-php)
+Este proyecto requiere de [la librería de integración con la API Redsys](https://github.com/arsys-internet/arsys-gmd-php-sdk)
 
 - Esta librería se instala en ```<root_folder>/src/includes```
 
