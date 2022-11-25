@@ -11,20 +11,46 @@ class CheckAvailability extends Action {
 
 		$premiumEnabled = (bool) $this->getParam( 'premiumEnabled' );
 
-		foreach ( $this->getParam( 'tldsToInclude' ) as $tld ) {
-			$response   = $this->getApp()->getService( 'api' )->checkDomain( $this->getParam( 'searchTerm' ) . $tld );
-			$domainInfo = $response->get( "domains" )[0];
+		$main = explode( '.', $this->getParam( 'searchTerm' ) );
+		$main = current ( $main );
+		if ( empty( $main ) ) {
+			$main = $this->getParam( 'searchTerm' );
+		}
 
-			$status = $domainInfo['available'] ? SearchResult::STATUS_NOT_REGISTERED : SearchResult::STATUS_REGISTERED;
+		foreach ( $this->getParam( 'tldsToInclude' ) as $tld ) {
+			$response   = $this->getApp()->getService( 'api' )->getDomainSuggestions(
+				$main, '', [ $tld ]
+			);
+
+			$domainInfo = ($response->getResponseData())[0];
+
+			/**
+			 * [STATUS_REGISTERED] => registered
+			[STATUS_NOT_REGISTERED] => available for registration
+			[STATUS_RESERVED] => reserved
+			[STATUS_UNKNOWN] => unknown
+			[STATUS_TLD_NOT_SUPPORTED] => tld not supported
+			 */
+			switch ( $domainInfo['state'] ) {
+				case 'registered_transferable':
+				case 'registered_not_transferable':
+				case 'internally_registered_not_transferable':
+				case 'trademark_protected':
+					$status =  SearchResult::STATUS_REGISTERED;
+					break;
+				case 'available':
+					$status = SearchResult::STATUS_NOT_REGISTERED;
+			}
+//			$status = $domainInfo['state'] ? SearchResult::STATUS_NOT_REGISTERED : SearchResult::STATUS_REGISTERED;
 
 			if ( ! $premiumEnabled && $domainInfo['premium'] ) {
 				$status = SearchResult::STATUS_RESERVED;
 			}
 
 			$temp = explode( '.', $domainInfo['name'] );
-			$name = $temp[0];
+			$name = $main;
 
-			$searchResult = new SearchResult( $name, $domainInfo['tld'] );
+			$searchResult = new SearchResult( $name, $tld );
 			$searchResult->setStatus( $status );
 
 			if ( $premiumEnabled && $domainInfo['premium'] ) {
